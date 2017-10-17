@@ -1,0 +1,11 @@
+devtools::create('.')
+devtools::use_data_raw(data2015)
+devtools::use_vignette("ProjetAlex")
+devtools::use_package("roxygen2")
+
+data2015 <- read.csv2("data-raw/data2015.csv", header = TRUE, sep = ",")
+data2016 <- read.csv2("data-raw/data2016.csv", header = TRUE, sep = ",")
+data2017 <- read.csv2("data-raw/data2017.csv", header = TRUE, sep = ",")
+devtools::use_data(data2015)
+devtools::use_data(data2016)
+devtools::use_data(data2017)

@@ -1,0 +1,18 @@
+Package: ProjetAlex
+Title: Analysis Of The World Happiness Report Database
+Version: 0.0.0.9000
+Author: Alexandre Chouraki
+Maintainer: Alexandre Chouraki <alexandre.chouraki@hec.edu>
+Description:
+    This package contains the database of the World Happiness Report for years 2015-2017, functions coded in order to analyze it, and an explanation of this analysis.
+Depends: R (>= 3.4.1)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports: readxl,
+    utils,
+    assertthat
+RoxygenNote: 6.0.1
