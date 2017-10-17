@@ -9,3 +9,5 @@ data2017 <- read.csv2("data-raw/data2017.csv", header = TRUE, sep = ",")
 devtools::use_data(data2015)
 devtools::use_data(data2016)
 devtools::use_data(data2017)
+
+devtools::build_vignettes()

@@ -40,9 +40,38 @@ knitr::opts_chunk$set(echo = TRUE, message = TRUE, eval = TRUE)
 library(readxl)
 library(utils)
 library(assertthat)
+library(dplyr)
+library(tidyverse)
+library(ProjetAlex)
 ```
 
-*First, I used the console to read the .csv files I downloaded on Kaggle, and converted it to .rda using devtools::use_data function.*
+*When building my package, I used the console to read the .csv files I downloaded on Kaggle, and converted it to .rda using devtools::use_data function. Now I am loading them.*
+
+```{r loading the data}
+load("../data/data2015.rda")
+load("../data/data2016.rda")
+load("../data/data2017.rda")
+
+```
+
 
 **Now that I have the data for each year, my first goal is to aggregate them in order to be able to observe the evolution of all countries over time**
+
+```{r concatenating data}
+# first, I have to mutate the data in order to add a column with the year in each database
+# I'm going to use a function I coded, in the R file, called add_year
+
+data2015 <- add_year(data2015, 2015)
+data2016 <- add_year(data2016, 2016)
+data2017 <- add_year(data2017, 2017)
+
+```
+
+```{r}
+# Now that I have the year of each observation, in order to bind all my data together, I have to change the names in the header
+
+```
+
+
+
 

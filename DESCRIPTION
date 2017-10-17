@@ -14,5 +14,8 @@ Suggests: knitr,
 VignetteBuilder: knitr
 Imports: readxl,
     utils,
-    assertthat
+    assertthat,
+    tidyr,
+    tidyverse,
+    dplyr
 RoxygenNote: 6.0.1
