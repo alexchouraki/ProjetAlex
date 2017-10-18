@@ -17,5 +17,7 @@ Imports: readxl,
     assertthat,
     tidyr,
     tidyverse,
-    dplyr
+    dplyr,
+    dygraphs,
+    ggplot2
 RoxygenNote: 6.0.1
