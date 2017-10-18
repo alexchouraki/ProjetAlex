@@ -96,19 +96,43 @@ rm(indx)
 #at long last, I can finally bind the data together
 data_Happiness <- bind_rows(data2015, data2016, data2017)
 ```
+** Let's start the analysis! **
 
-** Now, I can finally plot the evolution of Happiness, and all other indicators, for any country I want **
+Now, I can finally see how happiness has evolved in the last three years, for, say, top 5 countries in average happiness over the last 3 years.
 
 ```{r}
-
-data_Happiness %>% 
+top_5 <- data_Happiness %>%
   group_by(Country) %>% 
-  filter(Country == "France") %>% 
-  select(-Dystopia.Residual, - Happiness.Rank, - Happiness.Score) %>% 
- dygraph()
+  mutate(average_happiness = sum(Happiness.Score)/3) %>% 
+  select(Country, average_happiness) %>% 
+  distinct() %>% 
+  head(5) %>% 
+  pull(Country)
 
+top_5
+
+evolution_top_5 <- ggplot(data_Happiness %>% 
+                             filter(Country %in% top_5),
+                           aes(x = year, y = Happiness.Score, color = Country)) + geom_line() + theme_classic()   
+
+evolution_top_5
 ```
 
+The most surprising thing in this graph is the apparent drop of happiness in Canada.
+How can we explain it? 
+
+```{r}
+#Here, we are going to use a separate function I coded which gives us the evolution of the main indicators for any given country
+
+country_analysis("Canada")
+```
+
+This doesn't make much sense... The happiness in Canada dropped in a significant way from 2016 to 2017, but most indicators are either stable or increasing (especially Family, which should supposedly have the most impact on Happiness, along with GDP per Capita, which increases too). 
+
+In hindsight, this is not such a surprise : all the indicators aren't actually scores of the countries, simply the extent to which this factors make Canada happier than the imaginary country of Dystopia. So this actually means that Family and Social Support accounts for Happiness in Canada more than in 2016. 
+
+This is interesting, but not helpful at all for an analysis...
+* I still don't know why Canada is less happy than it was. 
 
 
 
