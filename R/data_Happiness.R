@@ -1,6 +1,6 @@
-#' data2016
+#' data_Happiness
 #'
-#' @name data2016
+#' @name data_Happiness
 #' @docType data
 #' @author Kaggle \email{alexandre.chouraki@@hec.edu}
 #' @references \url{kaggle.com}{https://www.kaggle.com/unsdsn/world-happiness}

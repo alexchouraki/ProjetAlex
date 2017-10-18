@@ -11,7 +11,7 @@ data2017
 \url{kaggle.com}{https://www.kaggle.com/unsdsn/world-happiness}
 }
 \author{
-Kaggle \email{vincent@thinkr.fr}
+Kaggle \email{alexandre.chouraki@hec.edu}
 }
 \keyword{data}
 \keyword{happiness}

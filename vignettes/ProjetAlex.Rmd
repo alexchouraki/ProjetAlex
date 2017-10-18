@@ -5,11 +5,6 @@ date: "17/10/2017"
 output: 
       rmarkdown::html_vignette:
         css: css/CSS_Splendor/css/splendor.css
-params:
-  country:
-    label: "Name of the specific country you want to analyze"
-    value: "France"
-    input: text
 vignette: >
   %\VignetteIndexEntry{Project World Happiness Report}
   %\VignetteEngine{knitr::rmarkdown}
@@ -43,6 +38,8 @@ library(assertthat)
 library(dplyr)
 library(tidyverse)
 library(ProjetAlex)
+library(dygraphs)
+library(ggplot2)
 ```
 
 *When building my package, I used the console to read the .csv files I downloaded on Kaggle, and converted it to .rda using devtools::use_data function. Now I am loading them.*
@@ -68,16 +65,33 @@ data2017 <- add_year(data2017, 2017)
 ```
 
 ```{r}
-# Now that I have the year of each observation, in order to bind all my data together, I have to tidy it so I have the same columns in each of my dataframes
+# Now that I have the year of each observation, in order to bind all my data together, I have to tidy it so I have the same columns in each of my dataframes, and only vectors
 
 data2015 <- data2015 %>% 
   select(-Region, -Standard.Error)
+indx <- sapply(data2015 %>% 
+                 select(-Country)
+               , is.factor)
+data2015[indx] <- lapply(data2015[indx], function(x) as.numeric(as.character(x)))
+
 data2016 <- data2016 %>% 
   select(-Region, -Lower.Confidence.Interval, -Upper.Confidence.Interval)
+
+indx <- sapply(data2016 %>% 
+                 select(-Country)
+               , is.factor)
+data2016[indx] <- lapply(data2016[indx], function(x) as.numeric(as.character(x)))
+
 data2017 <- data2017 %>% 
   select(-Whisker.high, -Whisker.low)
+indx <- sapply(data2017 %>% 
+                 select(-Country)
+               , is.factor)
+data2017[indx] <- lapply(data2017[indx], function(x) as.numeric(as.character(x)))
 
+rm(indx)
 ```
+
 ```{r}
 #at long last, I can finally bind the data together
 data_Happiness <- bind_rows(data2015, data2016, data2017)
@@ -86,6 +100,12 @@ data_Happiness <- bind_rows(data2015, data2016, data2017)
 ** Now, I can finally plot the evolution of Happiness, and all other indicators, for any country I want **
 
 ```{r}
+
+data_Happiness %>% 
+  group_by(Country) %>% 
+  filter(Country == "France") %>% 
+  select(-Dystopia.Residual, - Happiness.Rank, - Happiness.Score) %>% 
+ dygraph()
 
 ```
 

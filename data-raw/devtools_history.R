@@ -11,3 +11,5 @@ devtools::use_data(data2016)
 devtools::use_data(data2017)
 
 devtools::build_vignettes()
+devtools::use_package("dygraphs")
+devtools::use_package("ggplot2")
