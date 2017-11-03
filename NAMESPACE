@@ -2,5 +2,6 @@
 
 export(add_year)
 export(country_analysis)
+export(criteria_analysis)
 import(dygraphs)
 import(tidyverse)

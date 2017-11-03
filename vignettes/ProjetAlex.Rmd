@@ -54,7 +54,7 @@ load("../data/data2017.rda")
 
 **Now that I have the data for each year, my first goal is to aggregate them in order to be able to observe the evolution of all countries over time**
 
-```{r concatenating data}
+```{r adding years to the data}
 # first, I have to mutate the data in order to add a column with the year in each database
 # I'm going to use a function I coded, in the R file, called add_year
 
@@ -64,7 +64,7 @@ data2017 <- add_year(data2017, 2017)
 
 ```
 
-```{r}
+```{r uniformizing data}
 # Now that I have the year of each observation, in order to bind all my data together, I have to tidy it so I have the same columns in each of my dataframes, and only vectors
 
 data2015 <- data2015 %>% 
@@ -92,7 +92,7 @@ data2017[indx] <- lapply(data2017[indx], function(x) as.numeric(as.character(x))
 rm(indx)
 ```
 
-```{r}
+```{r binding data}
 #at long last, I can finally bind the data together
 data_Happiness <- bind_rows(data2015, data2016, data2017)
 ```
@@ -100,7 +100,7 @@ data_Happiness <- bind_rows(data2015, data2016, data2017)
 
 Now, I can finally see how happiness has evolved in the last three years, for, say, top 5 countries in average happiness over the last 3 years.
 
-```{r}
+```{r top happiness}
 top_5 <- data_Happiness %>%
   group_by(Country) %>% 
   mutate(average_happiness = sum(Happiness.Score)/3) %>% 
@@ -121,7 +121,7 @@ evolution_top_5
 The most surprising thing in this graph is the apparent drop of happiness in Canada.
 How can we explain it? 
 
-```{r}
+```{r Canada analysis over time}
 #Here, we are going to use a separate function I coded which gives us the evolution of the main indicators for any given country
 
 country_analysis("Canada")
@@ -132,7 +132,10 @@ This doesn't make much sense... The happiness in Canada dropped in a significant
 In hindsight, this is not such a surprise : all the indicators aren't actually scores of the countries, simply the extent to which this factors make Canada happier than the imaginary country of Dystopia. So this actually means that Family and Social Support accounts for Happiness in Canada more than in 2016. 
 
 This is interesting, but not helpful at all for an analysis...
-* I still don't know why Canada is less happy than it was. 
+* I still don't know why Canada is less happy than it was.
+* And apparently I have no way to figure it out, since looking for the evolution of the indicators is meaningless.
+
+I guess the best way to analyze this data is actually to compare the extent to which one given factor contributes to Happiness in all countries. 
 
 
 
