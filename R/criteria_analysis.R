@@ -10,9 +10,10 @@
 #' @example
 #' criteria_analysis(Freedom, 10, 2016)
 criteria_analysis <- function(criteria, top, focusyear){
-    data_Happiness %>%
-    filter(year == focusyear)
-    select(Country, criteria) %>%
-    distinct() %>%
-    head(top)
+    res <- data_Happiness %>%
+           filter(year == focusyear) %>%
+           select(Country, criteria) %>%
+           distinct() %>%
+           top_n(top, criteria)
+    return(res)
 }

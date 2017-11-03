@@ -95,7 +95,17 @@ rm(indx)
 ```{r binding data}
 #at long last, I can finally bind the data together
 data_Happiness <- bind_rows(data2015, data2016, data2017)
+
 ```
+
+```{r}
+# and make it a bit clearer
+data_Happiness <- data_Happiness %>% 
+  rename( Economy = Economy..GDP.per.Capita.) %>% 
+  rename( Health = Health..Life.Expectancy.) %>% 
+  rename( Trust = Trust..Government.Corruption.)
+```
+
 ** Let's start the analysis! **
 
 Now, I can finally see how happiness has evolved in the last three years, for, say, top 5 countries in average happiness over the last 3 years.
@@ -137,15 +147,34 @@ This is interesting, but not helpful at all for an analysis...
 
 I guess the best way to analyze this data is actually to compare the extent to which one given factor contributes to Happiness in all countries. 
 
-For example, let's see which country benefits the most from its GDP, from an happiness perspective. 
+For example, let's see which country benefits the most from its GDP per capita, from an happiness perspective. 
 
 ```{r}
-    data_Happiness %>%
-    filter(year == 2017) %>% 
-    select(Country, Economy..GDP.per.Capita.) %>%
-    distinct() %>%
-    head(5)
-    
+#Here, we are going to use a separate function I coded which gives us the list of best/worst ranking countries for a given year and a given criteria
+criteria_analysis('Economy', 10, 2017)
 ```
 
+This is interesting, because those countries are not even in the first 20 countries in the GDP per capita ranking (except for Switzerland which is 17th). 
 
+This is kind of obvious, but we now know that GDP per capita and GDP per capita actual contribution to happiness are two very different things.
+
+Let's see if we observe the same thing for the poorest countries : 
+
+```{r}
+criteria_analysis('Economy', -10, 2017)
+
+data_Happiness %>%
+           filter(year == 2017) %>%
+           select(Country, Economy) %>%
+           distinct() %>%
+           top_n(-10, Economy)
+```
+  
+```{r}
+ res <- data_Happiness %>%
+           filter(year == 2017) %>%
+           select(Country, Economy) %>%
+           distinct() %>%
+           top_n(10, Economy)
+res
+```
