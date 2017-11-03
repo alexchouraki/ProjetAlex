@@ -11,7 +11,8 @@
 #' criteria_analysis(Freedom, 10, 2016)
 criteria_analysis <- function(criteria, top, focusyear){
     data_Happiness %>%
-    select(year == focusyear, Country, criteria) %>%
+    filter(year == focusyear)
+    select(Country, criteria) %>%
     distinct() %>%
     head(top)
 }

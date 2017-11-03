@@ -137,6 +137,15 @@ This is interesting, but not helpful at all for an analysis...
 
 I guess the best way to analyze this data is actually to compare the extent to which one given factor contributes to Happiness in all countries. 
 
+For example, let's see which country benefits the most from its GDP, from an happiness perspective. 
 
+```{r}
+    data_Happiness %>%
+    filter(year == 2017) %>% 
+    select(Country, Economy..GDP.per.Capita.) %>%
+    distinct() %>%
+    head(5)
+    
+```
 
 
