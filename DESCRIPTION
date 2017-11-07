@@ -19,5 +19,6 @@ Imports: readxl,
     tidyverse,
     dplyr,
     dygraphs,
-    ggplot2
+    ggplot2,
+    rvest
 RoxygenNote: 6.0.1

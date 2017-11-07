@@ -40,6 +40,7 @@ library(tidyverse)
 library(ProjetAlex)
 library(dygraphs)
 library(ggplot2)
+library(rvest)
 ```
 
 *When building my package, I used the console to read the .csv files I downloaded on Kaggle, and converted it to .rda using devtools::use_data function. Now I am loading them.*
@@ -145,36 +146,95 @@ This is interesting, but not helpful at all for an analysis...
 * I still don't know why Canada is less happy than it was.
 * And apparently I have no way to figure it out, since looking for the evolution of the indicators is meaningless.
 
+My first great learning of this project : choose the database more wisely. This data is not actionable, not easy to analyze over time, and doesn't have enough depth... I'll continue anyway, but it's a lesson for next time. 
+
 I guess the best way to analyze this data is actually to compare the extent to which one given factor contributes to Happiness in all countries. 
 
 For example, let's see which country benefits the most from its GDP per capita, from an happiness perspective. 
 
 ```{r}
-#Here, we are going to use a separate function I coded which gives us the list of best/worst ranking countries for a given year and a given criteria
-criteria_analysis('Economy', 10, 2017)
+data_Happiness %>%
+           filter(year == 2016) %>%
+           select(Country, Economy) %>% 
+           arrange(desc(Economy), Country) %>% 
+           top_n(10, Economy)
+           
 ```
 
-This is interesting, because those countries are not even in the first 20 countries in the GDP per capita ranking (except for Switzerland which is 17th). 
 
-This is kind of obvious, but we now know that GDP per capita and GDP per capita actual contribution to happiness are two very different things.
+This is interesting, because it doesn't quite match the ranking of countries per GDP. GDP per capita seems to be contributing to happiness in Qatar the most, but it is ranked 5th in GDP per Capita. More striking, Kuwait is respectively ranked 4th in economic contribution to happiness, and 29th in GDP. 
+Conversely, Ireland is ranked 4th in GDP per Capita, but doesn't appear in our top. 
+
+This is kind of obvious, but we now know that GDP per capita and GDP per capita actual contribution to happiness are two different things.
 
 Let's see if we observe the same thing for the poorest countries : 
 
+  
 ```{r}
-criteria_analysis('Economy', -10, 2017)
-
 data_Happiness %>%
            filter(year == 2017) %>%
            select(Country, Economy) %>%
-           distinct() %>%
+           arrange(desc(Economy), Country) %>% 
            top_n(-10, Economy)
 ```
-  
+
+The rankings are not quite the same, but there are fewer surprises than for high GDP per capita.
+
+*We can probably assume that once a certain threshold has been reached, Economical contribution to Happiness and GDP per capita are not related anymore.*
+
+**Let's try to confirm this hypothesis.**
+
+First, I have to import actual GDP per Capita data. I can do this scraping wikipedia.
+
 ```{r}
- res <- data_Happiness %>%
-           filter(year == 2017) %>%
-           select(Country, Economy) %>%
-           distinct() %>%
-           top_n(10, Economy)
-res
+ wikiGDP <- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(nominal)_per_capita")
+ datawiki <- html_table(wikiGDP,fill = TRUE)
+ datawiki
 ```
+
+Now I want to keep only the third dataframe, which is 2016 data from the IMF, in USD, and tidy it.
+
+```{r}
+dataGDP <- datawiki[3]
+dataGDP <- dataGDP[[1]]
+dataGDP <- dataGDP %>% 
+           rename( "GDP.per.Capita" = "US$")
+dataGDP
+```
+
+```{r}
+# I have to convert Rank and GDP.per.Capita to numbers, drop the lines where Rank is equal to "–" and replace all commas by points in the GDP.per.Capita column
+
+dataGDP[, 1] <- sapply(dataGDP[,1], as.numeric)
+dataGDP[] <- lapply(dataGDP, gsub, pattern =',', replacement = '')
+dataGDP[,3] <- sapply(dataGDP[,3], as.numeric)
+dataGDP <- na.omit(dataGDP)
+
+```
+
+```{r}
+#I can now join my two dataframes
+dataGDP <- dataGDP %>% 
+  inner_join(data_Happiness %>% 
+               filter(year == 2016), by = 'Country')
+```
+
+
+```{r}
+dataGDP <- dataGDP %>% 
+  select(Rank, Country, GDP.per.Capita, Economy, Happiness.Score)
+
+dataGDP
+```
+
+Now, let's try to see what we get when we plot each countries GDP.per.Capita and Economic contribution to Happiness on the same graph.
+
+```{r}
+ggplot(dataGDP, aes(x = GDP.per.Capita, y = Economy)) + geom_point() + theme_classic() 
+```
+
+This is interesting ! We can see that for very poor countries, a slight increase in GDP per Capita results in a great increase in the Economic contribution to Happiness. But once the GDP has exceeded a given threshold, GDP per capita increase doesn't result in an increase in economic contribution to Happiness. This tends to confirm my hypothesis. 
+
+There SHOULD be some way to find something quite interesting with a non-linear regression - unfortunately my knowledge of non-linear regression (and how to do it with R) is not enough... yet. 
+
+
