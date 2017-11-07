@@ -1,5 +1,5 @@
 ---
-title: "Project World Happiness Report"
+title: "World Happiness Project"
 author: "Alexandre Chouraki"
 date: "17/10/2017"
 output: 
@@ -21,7 +21,7 @@ The World Happiness Report is a landmark survey of the state of global happiness
 
 The happiness scores and rankings use data from the Gallup World Poll. The scores are based on answers to the main life evaluation question asked in the poll. This question, known as the Cantril ladder, asks respondents to think of a ladder with the best possible life for them being a 10 and the worst possible life being a 0 and to rate their own current lives on that scale. The scores are from nationally representative samples for the years 2013-2016 and use the Gallup weights to make the estimates representative. The columns following the happiness score estimate the extent to which each of six factors – economic production, social support, life expectancy, freedom, absence of corruption, and generosity – contribute to making life evaluations higher in each country than they are in Dystopia, a hypothetical country that has values equal to the world’s lowest national averages for each of the six factors. They have no impact on the total score reported for each country, but they do explain why some countries rank higher than others.
 
-#### What do the columns succeeding the Happiness Score(like Family, Generosity, etc.) describe?
+#### What do the columns succeeding the Happiness Score (like Family, Generosity, etc.) describe?
 
 The following columns: GDP per Capita, Family, Life Expectancy, Freedom, Generosity, Trust Government Corruption describe the extent to which these factors contribute in evaluating the happiness in each country. The Dystopia Residual metric actually is the Dystopia Happiness Score(1.85) + the Residual value or the unexplained value for each country as stated in the previous answer.
 
@@ -186,15 +186,14 @@ The rankings are not quite the same, but there are fewer surprises than for high
 
 First, I have to import actual GDP per Capita data. I can do this scraping wikipedia.
 
-```{r}
+```{r scraping GDP}
  wikiGDP <- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(nominal)_per_capita")
  datawiki <- html_table(wikiGDP,fill = TRUE)
- datawiki
 ```
 
 Now I want to keep only the third dataframe, which is 2016 data from the IMF, in USD, and tidy it.
 
-```{r}
+```{r tidying GDP 1}
 dataGDP <- datawiki[3]
 dataGDP <- dataGDP[[1]]
 dataGDP <- dataGDP %>% 
@@ -202,7 +201,7 @@ dataGDP <- dataGDP %>%
 dataGDP
 ```
 
-```{r}
+```{r tidying GDP 2}
 # I have to convert Rank and GDP.per.Capita to numbers, drop the lines where Rank is equal to "–" and replace all commas by points in the GDP.per.Capita column
 
 dataGDP[, 1] <- sapply(dataGDP[,1], as.numeric)
@@ -212,7 +211,7 @@ dataGDP <- na.omit(dataGDP)
 
 ```
 
-```{r}
+```{r join GDP}
 #I can now join my two dataframes
 dataGDP <- dataGDP %>% 
   inner_join(data_Happiness %>% 
@@ -229,7 +228,7 @@ dataGDP
 
 Now, let's try to see what we get when we plot each countries GDP.per.Capita and Economic contribution to Happiness on the same graph.
 
-```{r}
+```{r plotting GDP}
 ggplot(dataGDP, aes(x = GDP.per.Capita, y = Economy)) + geom_point() + theme_classic() 
 ```
 
@@ -237,4 +236,67 @@ This is interesting ! We can see that for very poor countries, a slight increase
 
 There SHOULD be some way to find something quite interesting with a non-linear regression - unfortunately my knowledge of non-linear regression (and how to do it with R) is not enough... yet. 
 
+It would have been really interesting to be able to quantify the uplift in Happiness resulting from an increase in GDP per capita, but well, there's no point just wasting time regretting the lack of relevance of my database.
 
+*There is just one last thing I want to do : see how suicide rates and happiness are related, in order to judge the relevance of the KPI.*
+
+I am going to scrape it from Wikipedia, using 2017 data.
+
+```{r scraping suicide}
+ wikiSuicide <- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_suicide_rate")
+ datawikileretour <- html_table(wikiSuicide,fill = TRUE)
+ dataSuicide <- datawikileretour[2]
+ dataSuicide <- dataSuicide [[1]]
+```
+
+```{r tidying suicide 1}
+dataSuicide <- dataSuicide %>% 
+               select(1:3) %>% 
+              rename( "Suicides.per.100k" = "Both sexes") 
+colnames(dataSuicide)[1] <- "Suicide.Rank"
+```
+```{r tidying suicide 2}
+dataSuicide[, 1] <- sapply(dataSuicide[,1], as.numeric)
+dataSuicide[, 2] <- sapply(dataSuicide[,2], gsub, pattern =' \\(more info)', replacement = '')
+dataSuicide[, 2] <- sapply(dataSuicide[,2], gsub, pattern ='\\*', replacement = '')
+dataSuicide[, 3] <- sapply(dataSuicide[,3], as.numeric)
+dataSuicide <- na.omit(dataSuicide)
+```
+
+```{r join suicide}
+
+dataSuicide <- dataSuicide %>% 
+  inner_join(data_Happiness %>% 
+               filter(year == 2017), by = 'Country')
+
+```
+
+```{r}
+dataSuicide <- dataSuicide %>% 
+               select(1:6) %>% 
+               select(-year)
+              
+```
+
+```{r plotting suicide}
+ggplot(dataSuicide, aes(x = Suicides.per.100k, y = Happiness.Score)) + geom_point() + theme_classic() 
+```
+
+*Wow! Opposite of what I expected, there's no way Happiness Score and Suicide rate can be related ! Or if they are, I'll probably not be able to find a suitable model before I'm a full fledged data scientist... The most suicidal country is far from being the unhappiest one, and a lot of unhappy countries seem less suicidal than happier countries. *
+
+### Conclusion
+
+During this analysis, I found two main results :
+- Increase of GDP for poor countries leads to a higher spike in Economical Contribution to Happiness than for richer countries
+- Suicides and Happiness Score don't seem related
+
+This database was definitely disappointing...
+- No explainability of the Happiness.Score
+- Not enough data to predict anything in a realistic way
+- No way to account for the evolution of all happiness factors over time in a relevant way
+- Happiness is apparently unrelated to suicide, which seem quite surprising - maybe suicidal people are extreme cases, not likely taken into account in the studies used to construct the Happiness Score
+
+Now I know much better how to judge a database before starting an analysis, I think ; that's a great learning!
+And I'm eager to learn more of regression to be able to analyze with more depth.
+
+Thanks for reading! If you're interested in the subject, and you haven't seen it yet, here is a nice, inspiring [video](https://www.youtube.com/watch?v=usdJgEwMinM)!
